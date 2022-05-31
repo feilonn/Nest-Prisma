@@ -2,7 +2,9 @@ import { UpdatePostDto } from './../dto/update-post.dto';
 import { CreatePostDto } from './../dto/create-post.dto';
 import { PrismaService } from './../../prisma/prisma.service';
 import { PostEntity } from '../entities/post.entity';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class PostsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
