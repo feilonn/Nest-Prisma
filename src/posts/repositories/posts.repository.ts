@@ -27,7 +27,7 @@ export class PostsRepository {
 
     //Caso não encontre o usuario com o email passado pelo DTO
     if (!user) {
-      throw new NotFoundError('User not found.');
+      throw new NotFoundError('Author not found.');
     }
 
     //Spread para concatenar as informações do DTO para fazer o create.
@@ -60,11 +60,47 @@ export class PostsRepository {
   }
 
   async update(id: number, updatePostDTO: UpdatePostDto): Promise<PostEntity> {
-    return this.prisma.post.update({
+    //Repetindo o mesmo processo do create, mas antes se verifica se está sendo enviado um email.
+    const { authorEmail } = updatePostDTO;
+
+    if (!authorEmail) {
+      return this.prisma.post.update({
+        data: updatePostDTO,
+        where: { id },
+      });
+    }
+
+    delete updatePostDTO.authorEmail;
+
+    const user = await this.prisma.user.findUnique({
       where: {
-        id: id,
+        email: authorEmail,
       },
-      data: updatePostDTO,
+    });
+
+    if (!user) {
+      throw new NotFoundError('Author not found.');
+    }
+
+    const data: Prisma.PostUpdateInput = {
+      ...updatePostDTO,
+      author: {
+        connect: {
+          email: authorEmail,
+        },
+      },
+    };
+
+    return this.prisma.post.update({
+      where: { id: id },
+      data: data,
+      include: {
+        author: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
   }
 
