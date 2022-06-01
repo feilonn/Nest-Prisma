@@ -5,9 +5,21 @@ import { AppModule } from './app.module';
 import { NotFoundInterceptor } from './commom/errors/interceptors/notfound.interceptor';
 import { UnauthorizedInterceptor } from './commom/errors/interceptors/unauthorized.interceptor';
 import { DataBaseInterceptor } from './commom/errors/interceptors/database.interceptor';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const config = new DocumentBuilder()
+    .setTitle('Simple blog')
+    .setDescription('The simple blog API description')
+    .setVersion('1.0')
+    .addTag('blog')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
